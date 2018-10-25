@@ -1,0 +1,62 @@
+---
+  - name: "create Amun Template"
+    command: oc create --save-config=true --namespace "{{ AMUN_INFRA_NAMESPACE  }}" --filename "{{ item }}" 
+    with_items:
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/buildConfig-template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/configmap-template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/deployment-template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/inspectBuildConfig-template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/inspectImageStream-template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/inspectJob-template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/secrets-template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-hwinfo/master/openshift/imageStream-template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-hwinfo/master/openshift/buildConfig-template.yaml"
+
+  - name: check if required Templates exist
+    command: "oc get template --namespace {{ AMUN_INFRA_NAMESPACE  }} {{ item }}"
+    with_items:
+      - "amun-core"
+      - "amun-secrets"
+      - "amun-configmap"
+    changed_when: false
+
+  - name: "create ServiceAccount and RoleBinding"
+    shell: oc process --namespace="{{ AMUN_INFRA_NAMESPACE }}" amun-core \
+      -p AMUN_INSPECTION_NAMESPACE="{{ AMUN_INSPECTION_NAMESPACE }}" \
+      -p AMUN_API_NAMESPACE="{{ AMUN_API_NAMESPACE }}" | 
+        oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename -
+
+  - name: "create Amun Secret"
+    shell:
+      oc process --namespace {{ AMUN_INFRA_NAMESPACE }} amun-secrets
+      -p AMUN_API_APP_SECRET_KEY="{{ AMUN_API_APP_SECRET_KEY }}"
+      -p SENTRY_DSN="{{ SENTRY_DSN }}" | 
+        oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename - 
+
+  - name: "create Amun ConfigMap"
+    shell:
+      oc process --namespace {{ AMUN_INFRA_NAMESPACE }} amun-configmap
+      -p AMUN_INSPECTION_NAMESPACE="{{ AMUN_INSPECTION_NAMESPACE }}" \
+      -p AMUN_INFRA_NAMESPACE="{{ AMUN_INFRA_NAMESPACE }}" \
+      -p PROMETHEUS_PUSHGATEWAY_HOST="{{ PROMETHEUS_PUSHGATEWAY_HOST }}" \
+      -p PROMETHEUS_PUSHGATEWAY_PORT="{{ PROMETHEUS_PUSHGATEWAY_PORT }}" | 
+        oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename - 
+
+  - name: "create Amun Inspect HW Info ImageStream"
+    shell: oc process --namespace "{{ AMUN_INFRA_NAMESPACE }}" amun-inspect-hwinfo-imagestream | 
+        oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename - 
+
+  - name: "create Amun API BuildConfig"
+    shell:
+      oc process --namespace "{{ AMUN_INFRA_NAMESPACE  }}" amun-api-buildconfig | 
+        oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename - 
+
+  - name: "create Amun Inspect HW Info BuildConfig" 
+    shell: oc process --namespace "{{ AMUN_INFRA_NAMESPACE }}" amun-inspect-hwinfo-buildconfig | 
+        oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename - 
+
+  - name: create Amun API DeploymentConfig
+    shell:
+      oc process --namespace "{{ AMUN_INFRA_NAMESPACE  }}" amun-api-deployment | 
+        oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename - 

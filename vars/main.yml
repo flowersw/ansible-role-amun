@@ -1,0 +1,4 @@
+---
+AMUN_INFRA_NAMESPACE: "thoth-test-core"
+AMUN_API_NAMESPACE: "thoth-test-core"
+AMUN_INSPECTION_NAMESPACE: "thoth-test-core"
