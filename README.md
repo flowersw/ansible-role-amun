@@ -8,9 +8,11 @@ Role Variables
 
 This role requires a few variables:
 
+```
 AMUN_INFRA_NAMESPACE: "<namespace containing the templates>"
-AMUN_API_NAMESPACE: "<namespace hosting the amun api"
-AMUN_INSPECTION_NAMESPACE: "<namespace for running the inspection jobs"
+AMUN_API_NAMESPACE: "<namespace hosting the amun api>"
+AMUN_INSPECTION_NAMESPACE: "<namespace for running the inspection jobs>"
+```
 
 Example Playbook
 ----------------
