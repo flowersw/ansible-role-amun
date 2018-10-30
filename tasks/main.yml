@@ -1,5 +1,5 @@
 ---
-  - name: "create Amun Template"
+  - name: "create Amun Templates"
     command: oc create --save-config=true --namespace "{{ AMUN_INFRA_NAMESPACE  }}" --filename "{{ item }}" 
     with_items:
       - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/buildConfig-template.yaml"
@@ -12,14 +12,6 @@
       - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/template.yaml"
       - "https://raw.githubusercontent.com/thoth-station/amun-hwinfo/master/openshift/imageStream-template.yaml"
       - "https://raw.githubusercontent.com/thoth-station/amun-hwinfo/master/openshift/buildConfig-template.yaml"
-
-  - name: check if required Templates exist
-    command: "oc get template --namespace {{ AMUN_INFRA_NAMESPACE  }} {{ item }}"
-    with_items:
-      - "amun-core"
-      - "amun-secrets"
-      - "amun-configmap"
-    changed_when: false
 
   - name: "create ServiceAccount and RoleBinding"
     shell: oc process --namespace="{{ AMUN_INFRA_NAMESPACE }}" amun-core \
