@@ -9,15 +9,20 @@
       - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/inspectImageStream-template.yaml"
       - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/inspectJob-template.yaml"
       - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/secrets-template.yaml"
-      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/amunApiNamespace-template.yaml"
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/amunInspectionNamespace-template.yaml"
       - "https://raw.githubusercontent.com/thoth-station/amun-hwinfo/master/openshift/imageStream-template.yaml"
       - "https://raw.githubusercontent.com/thoth-station/amun-hwinfo/master/openshift/buildConfig-template.yaml"
 
   - name: "create ServiceAccount and RoleBinding"
-    shell: oc process --namespace="{{ AMUN_INFRA_NAMESPACE }}" amun-core \
-      -p AMUN_INSPECTION_NAMESPACE="{{ AMUN_INSPECTION_NAMESPACE }}" \
+    shell: oc process --namespace="{{ AMUN_INFRA_NAMESPACE }}" amun-core-api \
       -p AMUN_API_NAMESPACE="{{ AMUN_API_NAMESPACE }}" | 
         oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename -
+
+  - name: "create ServiceAccount and RoleBinding"
+    shell: oc process --namespace="{{ AMUN_INFRA_NAMESPACE }}" amun-core-inspection \
+      -p AMUN_API_NAMESPACE="{{ AMUN_API_NAMESPACE }}" | 
+        oc apply --namespace "{{ AMUN_INSPECTION_NAMESPACE }}" --filename -
 
   - name: "create Amun Secret"
     shell:
