@@ -65,7 +65,7 @@
       oc process --namespace "{{ AMUN_INFRA_NAMESPACE  }}" amun-api-buildconfig |
         oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename -
 
-  - name: "deploy Amun API to {{ amun_api_namespace }}"
+  - name: "deploy Amun API to {{ AMUN_API_NAMESPACE }}"
     shell:
       oc process --namespace "{{ AMUN_INFRA_NAMESPACE  }}" amun-api-deployment \
       -p SERVICE_ACCOUNT_NAME="{{ SERVICE_ACCOUNT_NAME }}" \
