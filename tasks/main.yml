@@ -4,6 +4,7 @@
       - templates
     command: oc create --save-config=true --namespace "{{ AMUN_INFRA_NAMESPACE  }}" --filename "{{ item }}"
     with_items:
+      - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/imagestream-template.yaml"
       - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/buildConfig-template.yaml"
       - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/configmap-template.yaml"
       - "https://raw.githubusercontent.com/thoth-station/amun-api/master/openshift/deployment-template.yaml"
@@ -49,14 +50,19 @@
       oc process --namespace "{{ AMUN_INFRA_NAMESPACE }}" amun-inspect-hwinfo-imagestream |
         oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename -
 
-  - name: "create Amun API BuildConfig"
-    shell:
-      oc process --namespace "{{ AMUN_INFRA_NAMESPACE  }}" amun-api-buildconfig |
-        oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename -
-
   - name: "create Amun Inspect HW Info BuildConfig"
     shell:
       oc process --namespace "{{ AMUN_INFRA_NAMESPACE }}" amun-inspect-hwinfo-buildconfig |
+        oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename -
+
+  - name: "create Amun API ImageStream"
+    shell:
+      oc process --namespace "{{ AMUN_INFRA_NAMESPACE }}" amun-api-imagestream |
+        oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename -
+
+  - name: "create Amun API BuildConfig"
+    shell:
+      oc process --namespace "{{ AMUN_INFRA_NAMESPACE  }}" amun-api-buildconfig |
         oc apply --namespace "{{ AMUN_API_NAMESPACE }}" --filename -
 
   - name: "deploy Amun API to {{ amun_api_namespace }}"
